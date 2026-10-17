@@ -1,0 +1,49 @@
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: 3.4.3
+serverless_language: ''
+refresh_interval_floor: ''
+polling_url: https://api.keeptrack.space/v4/sat/{{ norad_id }}
+polling_headers: 'X-API-Key: {{api_key}}'
+polling_body: ''
+id: 509898
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
+custom_fields:
+- keyname: doesnt_matter
+  field_type: author_bio
+  name: Satellite Trajectory
+  description: Instead of tracking only ISS like other plugin, this plugin track any satellite via NORAD ID. Features past/future trajectory paths, using KeepTrack API integration.(Contact @albert7617 on TRMNL Discord if experiencing issue)
+  category: discovery,images
+  learn_more_url: https://keeptrack.space/
+  github_url: https://github.com/albert7617/trmnl-satellite-trajectory
+- keyname: api_key
+  field_type: string
+  name: KeepTrack API Key
+  description: Register API key at <a href="https://keeptrack.space/">keeptrack.space</a>.
+  required: true
+- keyname: norad_id
+  field_type: number
+  name: NORAD ID
+  description: Satellite catalog number. Find on <a href="https://keeptrack.space/satellites">CelesTrak</a> or <a href="https://orbitalradar.com/">N2YO</a> (e.g. 25544 for ISS).
+  default: 48274
+  required: true
+- keyname: trajectory_past
+  field_type: number
+  name: Past Trajectory (Hours)
+  description: Hours of historical track displayed.
+  default: 1
+  required: true
+- keyname: trajectory_future
+  field_type: number
+  name: Future Trajectory (Hours)
+  description: Hours of predicted track displayed as dashed line.
+  default: 1
+  required: true
+name: Satellite Trajectory
+description: Track any satellite via NORAD ID
+refresh_interval: 15

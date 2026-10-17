@@ -1,0 +1,248 @@
+<script src="https://trmnl.com/js/maplibre-gl/5.24.0/maplibre-gl.js"></script>
+<link href="https://trmnl.com/js/maplibre-gl/5.24.0/maplibre-gl.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.4.0/turf.min.js"></script>
+
+{% assign satellite_icon="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhLS0gTGljZW5zZTogQ0MwLiBNYWRlIGJ5IFNWRyBSZXBvOiBodHRwczovL3d3dy5zdmdyZXBvLmNvbS9zdmcvOTI2OTMvc2F0ZWxsaXRlIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA1MTEuOTk2IDUxMS45OTYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMS45OTYgNTExLjk5NjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0yODMuNjA4LDQ0Mi45NzloLTU1LjIxNmgtMzcuNjQ3djMuMjE2YzAsMzAuNDUxLDI1LjM3Myw1NS43NjQsNTUuODI0LDU1Ljc2NGgxOC44NgoJCQljMzAuNDUzLDAsNTUuODI2LTI1LjMxMyw1NS44MjYtNTUuNzY0di0zLjIxNkgyODMuNjA4eiIvPgoJPC9nPgo8L2c+CjxnPgoJPGc+CgkJPHBhdGggZD0iTTQ5Mi42NjksMjI4LjM5SDM4My4yNTNjLTEwLjM5NywwLTE5LjMzMiw4LjM1OC0xOS4zMzIsMTguNzUzdjU1LjI4NmgtMjEuMzMzdi03OC4xNjcKCQkJYzAtMTAuMzk2LTguNDAyLTE4LjQ2MS0xOC43OTctMTguNDYxaC0xMS4zMnYtMjkuNDNjMC0wLjA1MywwLjI2LTAuMTA0LDAuMjU5LTAuMTU3YzI5LjI1NC0xMC43NTcsNTUuNTMyLTI5LjYxOSw3NC43OTMtNTQuNzQ0CgkJCWwxOS45NDctMjUuOTMxYzQuMzYxLTUuNjg2LDUuMTQ4LTEzLjM2LDEuOTc1LTE5Ljc4N2MtMy4xNzItNi40MjgtOS42ODItMTAuNS0xNi44NDctMTAuNUgyNzQuODI0VjI4Ljg2MQoJCQljMC0xMC4zOTYtOC40MjgtMTguODIzLTE4LjgyNC0xOC44MjNjLTEwLjM5NiwwLTE4LjgyNCw4LjQyOC0xOC44MjQsMTguODIzdjM2LjM5MkgxMTkuNDAzYy03LjE2NSwwLTEzLjcxLDQuMDczLTE2Ljg4MSwxMC41CgkJCWMtMy4xNyw2LjQyNi0yLjQxNywxNC4wOTgsMS45NDMsMTkuNzg1bDE5Ljg4LDI1LjkzM2MxOS4yNjEsMjUuMTI0LDQ1LjY3Myw0My45ODcsNzQuOTI1LDU0Ljc0NGMwLDAuMDU0LDAuMjYsMC4xMDUsMC4yNiwwLjE1OAoJCQl2MjkuNDNoLTExLjMyYy0xMC4zOTYsMC0xOC43OTcsOC4wNjUtMTguNzk3LDE4LjQ2MXY3OC4xNjdoLTIxLjMzM3YtNTUuMjg2YzAtMTAuMzk2LTguOTM1LTE4Ljc1My0xOS4zMzEtMTguNzUzSDE5LjMzMQoJCQlDOC45MzUsMjI4LjM5LDAsMjM2Ljc0OCwwLDI0Ny4xNDR2MTQ4LjIxOGMwLDEwLjM5Nyw4LjkzNSwxOC43NTUsMTkuMzMxLDE4Ljc1NWgxMDkuNDE2YzEwLjM5NiwwLDE5LjMzMS04LjM1OCwxOS4zMzEtMTguNzUzCgkJCXYtNTUuMjg2aDIxLjMzM3Y3MS40ODdjMCw1LjkyMywyLjcyOCwxMS4yMiw3LjAwNCwxNC42N2MzLjIyOSwyLjYwOCw3LjMyLDQuMTk2LDExLjc5NCw0LjE5NmgxMzUuNTgxCgkJCWM0LjQ3NCwwLDguNTY1LTEuNTg5LDExLjc5NC00LjE5NmM0LjI3Ni0zLjQ1LDcuMDA0LTguNzQ4LDcuMDA0LTE0LjY3di03MS40ODdoMjEuMzMzdjU1LjI4NgoJCQljMCwxMC4zOTYsOC45MzUsMTguNzUzLDE5LjMzMSwxOC43NTNoMTA5LjQxNmMxMC4zOTYsMCwxOS4zMzEtOC4zNTgsMTkuMzMxLTE4Ljc1M1YyNDcuMTQ0CgkJCUM1MTIsMjM2Ljc0OCw1MDMuMDY1LDIyOC4zOSw0OTIuNjY5LDIyOC4zOXogTTExMC40MzEsMzYzLjkySDM3LjY0N3YtMzAuMTE4aDcyLjc4NFYzNjMuOTJ6IE0xMTAuNDMxLDMwOC43MDRIMzcuNjQ3di0zMC4xMTgKCQkJaDcyLjc4NFYzMDguNzA0eiBNNDc0LjM1MywzNjMuOTJoLTcyLjc4NHYtMzAuMTE4aDcyLjc4NFYzNjMuOTJ6IE00NzQuMzUzLDMwOC43MDRoLTcyLjc4NHYtMzAuMTE4aDcyLjc4NFYzMDguNzA0eiIvPgoJPC9nPgo8L2c+Cjwvc3ZnPgo=" %}
+{% assign custom_fields_values=trmnl.plugin_settings.custom_fields_values %}
+
+<!-- <div class="layout image-dither" id="map"></div> -->
+
+<div class="layout">
+  <div id="map" class="map stretch w--full rounded--base"></div>
+</div>
+<div class="title_bar">
+  <!-- class="image--adaptive" doesn't seems to work here... -->
+  <img class="image" src="{{ satellite_icon }}">
+  <span class="title" id="satellite-name"></span>
+  <span class="instance" id="data-time"></span>
+</div>
+
+<script type="module">
+  import { Satellite } from 'https://cdn.jsdelivr.net/npm/ootk/+esm';
+
+  // Tunable hours variables
+  const PAST_HOURS = {{ custom_fields_values.trajectory_past }};
+  const FUTURE_HOURS = {{ custom_fields_values.trajectory_future }};  
+
+  // Split trajectory lines across the Antimeridian (+180/-180 longitude jump) to avoid continuous horizontal map lines
+  function buildAntimeridianSplitSegments(rawPoints) {
+    const segments = [];
+    let currentSegment = [];
+
+    for (let i = 0; i < rawPoints.length; i++) {
+      const pt = rawPoints[i];
+      const coord = [pt.lon, pt.lat]; // Turf/GeoJSON uses [lon, lat]
+
+      if (currentSegment.length > 0) {
+        const prevLon = currentSegment[currentSegment.length - 1][0];
+        // If longitude jumps across antimeridian (>180 deg change)
+        if (Math.abs(pt.lon - prevLon) > 180) {
+          if (currentSegment.length > 1) {
+            segments.push(currentSegment);
+          }
+          currentSegment = [];
+        }
+      }
+      currentSegment.push(coord);
+    }
+
+    if (currentSegment.length > 1) {
+      segments.push(currentSegment);
+    }
+
+    return segments;
+  }
+
+  function createGeoJSONCollection(rawPoints) {
+    const lineSegments = buildAntimeridianSplitSegments(rawPoints);
+    const lineFeatures = lineSegments.map(seg => turf.lineString(seg));
+    return turf.featureCollection(lineFeatures.map(f => turf.cleanCoords(f)));
+  }
+
+  // Calculate and Render Trajectory
+  function runPropagationAndRender() {    
+    const now = Date.now();
+    const startTime = now - (PAST_HOURS * 60 * 60 * 1000);
+    const endTime = now + (FUTURE_HOURS * 60 * 60 * 1000);
+    const stepMs = 60 * 1000; // 1-minute steps
+
+    const pastPoints = [];
+    const futurePoints = [];
+
+    document.getElementById("satellite-name").innerHTML = `{{ ALT_NAME }}`;
+
+    if (`{{ STATUS }}` == 'D') {
+      document.getElementById("data-time").innerHTML = "Decayed";
+      return;
+    } else {
+      document.getElementById("data-time").innerHTML = "{{ OWNER }}";
+    }
+
+    const satellite = new Satellite({ tle1: `{{ TLE_LINE_1 }}`, tle2: `{{ TLE_LINE_2 }}` });
+
+    // 1. Calculate positions via OOTK
+    for (let t = startTime; t <= endTime; t += stepMs) {
+      const date = new Date(t);
+      const lla = satellite.lla(date);
+      const pt = {
+        timestamp: date.toISOString(),
+        lat: parseFloat(lla.lat.toFixed(4)),
+        lon: parseFloat(lla.lon.toFixed(4)),
+        alt: parseFloat(lla.alt.toFixed(2))
+      };
+
+      if (t <= now) {
+        pastPoints.push(pt);
+      }
+      if (t >= now) {
+        futurePoints.push(pt);
+      }
+    }
+
+    const pastCollection = createGeoJSONCollection(pastPoints);
+    const futureCollection = createGeoJSONCollection(futurePoints);
+
+    // Combine features for total bounds
+    const combinedFeatures = [...pastCollection.features, ...futureCollection.features];
+    const combinedCollection = turf.featureCollection(combinedFeatures);
+    const bbox = turf.bbox(combinedCollection);
+
+    // Render Past Source & Layer
+    if (map.getSource('iss-trajectory-past')) {
+      map.getSource('iss-trajectory-past').setData(pastCollection);
+    } else {
+      map.addSource('iss-trajectory-past', { type: 'geojson', data: pastCollection });
+      map.addLayer({
+        id: 'iss-trajectory-past-line',
+        type: 'line',
+        source: 'iss-trajectory-past',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#000000', 'line-width': 2, 'line-opacity': 0.95 }
+      });
+    }
+
+    // Render Future Source & Layer (Dashed)
+    if (map.getSource('iss-trajectory-future')) {
+      map.getSource('iss-trajectory-future').setData(futureCollection);
+    } else {
+      map.addSource('iss-trajectory-future', { type: 'geojson', data: futureCollection });
+      map.addLayer({
+        id: 'iss-trajectory-future-line',
+        type: 'line',
+        source: 'iss-trajectory-future',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-color': '#000000',
+          'line-width': 2,
+          'line-opacity': 0.85,
+          'line-dasharray': [3, 3]
+        }
+      });
+    }
+
+    // Render Current Position Marker
+    const latestPoint = pastPoints[pastPoints.length - 1];
+
+    // Calculate heading using Turf.js bearing between last two points
+    const prevPoint = pastPoints.length > 1 ? pastPoints[pastPoints.length - 2] : latestPoint;
+    const bearing = turf.bearing(
+      [prevPoint.lon, prevPoint.lat],
+      [latestPoint.lon, latestPoint.lat]
+    );
+
+    map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], {
+      animate: false,
+      padding: 40,
+      maxZoom: 2
+    });
+
+    const currentGeoJSON = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [latestPoint.lon, latestPoint.lat]
+        },
+        properties: {
+          bearing: bearing
+        }
+      }]
+    };
+
+    const updateCurrentLayer = () => {
+      if (map.getSource('iss-current')) {
+        map.getSource('iss-current').setData(currentGeoJSON);
+      } else {
+        map.addSource('iss-current', { type: 'geojson', data: currentGeoJSON });
+        map.addLayer({
+          id: 'iss-current-layer',
+          type: 'symbol',
+          source: 'iss-current',
+          layout: {
+            'icon-image': 'satellite-icon',
+            'icon-size': 48 / 512,
+            'icon-rotate': ['get', 'bearing'],
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true
+          }
+        });
+      }
+    };
+
+    if (!map.hasImage('satellite-icon')) {
+      const img = new Image();
+      img.onload = () => {
+        map.addImage('satellite-icon', img);
+        updateCurrentLayer();
+      };
+      img.src = `{{ satellite_icon }}`;
+    } else {
+      updateCurrentLayer();
+    }
+  }
+
+  // Wait for MapLibre and the framework TRMNLMaps helper (bundled in the
+  // plugin runtime), then build the map from the live screen.
+  function whenReady(cb) {
+    var tries = 0;
+    (function attempt() {
+      if (window.TRMNLMaps && window.maplibregl) return cb();
+      if (++tries > 200) return;
+      setTimeout(attempt, 50);
+    })();
+  }
+
+
+  let map, trajectoryLayerGroup, currentMarkerLayer;
+
+  function create_map() {
+    whenReady(function () {
+      var el = "map";
+      // watch() rebuilds on device/scale/mode/dark/theme change; options() carries
+      // the style for the preset, painted from the live screen.
+      TRMNLMaps.watch(el, function () {
+        map = new maplibregl.Map(TRMNLMaps.options({
+          el: el, preset: "streets"
+        }), {
+          center: [121.011756, 24.769163],
+          zoom: 0,
+          minZoom: 0,
+          renderWorldCopies: true
+        });
+
+        map.on('load', () => {
+          runPropagationAndRender();
+        });
+
+        return map;
+      });
+    });
+
+  }
+
+  create_map();
+</script>
+
+
